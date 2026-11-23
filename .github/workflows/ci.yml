@@ -39,13 +39,3 @@ jobs:
           assert r2.status_code == 200, f'Predict failed: {r2.text}'
           print('API Test Passed:', r2.json())
           "
-
-services:
-  - type: web
-    name: student-result-api
-    runtime: docker
-    plan: free
-    branch: master
-
-
-    

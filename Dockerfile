@@ -1,19 +1,21 @@
-# 1. Start with an official lightweight Python image
-FROM python:3.12-slim
+# Stage 1: Build React Frontend
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
-# 2. Set the working directory inside the container
+# Stage 2: Python FastAPI Backend
+FROM python:3.12-slim
 WORKDIR /app
 
-# 3. Copy and install dependencies first (better caching)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Copy your FastAPI app and trained model into the container
-COPY main.py .
-COPY student_result.pkl .
+COPY main.py student_result.pkl ./
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# 5. Expose the port Render uses
 EXPOSE 8000
 
-# 6. Start the FastAPI server (Render injects the $PORT variable)
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

@@ -1,20 +1,34 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
-import pandas as pd  # <-- ADD THIS LINE
-from pydantic import BaseModel
+import pandas as pd
+from pydantic import BaseModel, Field
 
-app = FastAPI()
+app = FastAPI(title="Student Pass/Fail Predictor API")
+
+# Enable CORS for frontend (React)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 model = joblib.load("student_result.pkl")
 
 
 class StudentInput(BaseModel):
-    StudyHours: float
+    StudyHours: float = Field(..., ge=0, le=24, description="Daily study hours between 0 and 24")
 
 
 @app.get("/")
-def test():
-    return {"message": "running"}
+def read_root():
+    return {
+        "message": "Student Result Prediction API is running",
+        "docs_url": "/docs",
+        "endpoints": {"predict": "/predict"},
+    }
 
 
 @app.post("/predict")

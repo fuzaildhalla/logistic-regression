@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import './App.css'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (typeof window !== 'undefined' && window.location.origin.includes('logistic-regression-2kr9') 
+    ? '' 
+    : 'https://logistic-regression-2kr9.onrender.com')
+
 function App() {
   const [studyHours, setStudyHours] = useState('5.0')
   const [loading, setLoading] = useState(false)
@@ -20,8 +25,8 @@ function App() {
     setLoading(true)
 
     try {
-      // In dev with Vite proxy, '/predict' forwards to http://127.0.0.1:8000/predict
-      const response = await fetch('/predict', {
+      const endpoint = `${API_BASE_URL}/predict`
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -39,3 +39,14 @@ jobs:
           assert r2.status_code == 200, f'Predict failed: {r2.text}'
           print('API Test Passed:', r2.json())
           "
+
+      - name: Trigger Render Deploy Hook
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        env:
+          HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$HOOK_URL" ]; then
+            curl -X POST "$HOOK_URL"
+          else
+            echo "RENDER_DEPLOY_HOOK_URL not set; skipping hook (Render auto-deploy on git push is active)."
+          fi
